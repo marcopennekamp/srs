@@ -1,0 +1,14 @@
+{% extends "internal_base.html" %}
+
+{% block content %}
+<h1>{{ kanji.character }}</h1>
+
+<p>
+{% if not is_known %}
+    You do not know this Kanji yet. <button onclick="mark_single_kanji({{ kanji.id }})">Mark as known</button>
+{% else %}
+    You know this Kanji already. <button onclick="unmark_single_kanji({{ kanji.id }})">Remove from known</button>
+{% endif %}
+</p>
+
+{% endblock %}

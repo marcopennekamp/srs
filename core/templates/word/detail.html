@@ -1,0 +1,25 @@
+{% extends "internal_base.html" %}
+
+{% block content %}
+<h1>{{ word.word }}</h1>
+<p>Readings: {{ readings }}</p>
+<p>Meanings: {{ meanings }}</p>
+
+{% if level == -1 %}
+<p>Status: You haven't discovered this word yet.</p>
+{% elif level == 0 %}
+<p>Status: You have discovered this word, but it is not yet in your review queue.</p>
+{% elif level == max_level %}
+<p>Status: This word has reached the maximum level of {{ max_level }}!</p>
+{% else %}
+<p>Status: This word is in your review pool with the following level: {{ level }}.</p>
+{% endif %}
+
+{% if kanji_list %} {# This section is only shown for words that depend on at least one Kanji. #}
+<p>Depends on the following Kanji:</p>
+<p>
+{% include "kanji/_list.html" %}
+</p>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div id="header">
+    <a href="{% url "dashboard" %}">Dashboard</a> |
+    <a href="{% url "word-list" %}">All Words</a> |
+    <a href="{% url "kanji-list" %}">All Kanji</a> |
+    <a href="{% url "kanji-collection-list" 'wanikani' %}">WaniKani Kanji</a> |
+    <a href="{% url "kanji-collection-list" 'jlpt' %}">JLPT Kanji</a> |
+    <a href="{% url "logout" %}">Logout</a>
+</div>
+<div id="content">
+    {% block content %}{% endblock %}
+</div>
+{% endblock %}

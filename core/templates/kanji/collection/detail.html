@@ -1,0 +1,12 @@
+{% extends "internal_base.html" %}
+
+{% block content %}
+<h1>{{ collection.name }}</h1>
+
+<div style="padding-bottom: 2em;">
+    <button onclick="mark_kanji('{{ kanji_id_json }}')">Mark all as known</button>
+    <button onclick="unmark_kanji('{{ kanji_id_json }}')">Remove all from known</button>
+</div>
+
+{% include "kanji/_list.html" with kanji_list=collection.kanji_list.all %}
+{% endblock %}

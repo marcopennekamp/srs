@@ -1,0 +1,10 @@
+{% extends "internal_base.html" %}
+
+{% block content %}
+{% for collection in collection_list %}
+    <div class="collection-box">
+        <h1><a href="{% url "kanji-collection-detail" collection.id %}">{{ collection.name }}</a></h1>
+        {% include "kanji/_list.html" with kanji_list=collection.kanji_list.all %}
+    </div>
+{% endfor %}
+{% endblock %}

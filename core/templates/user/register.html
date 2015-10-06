@@ -1,0 +1,29 @@
+{% extends "external_base.html" %}
+
+{% block content %}
+<h1>Register</h1>
+
+<form method="post" action="{% url 'register' %}">
+    {% csrf_token %}
+
+    <p>
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        <span class="error">{{ form.username.errors.as_text }}</span>
+    </p>
+
+    <p>
+        {{ form.email.label_tag }}
+        {{ form.email }}
+        <span class="error">{{ form.email.errors.as_text }}</span>
+    </p>
+
+    <p>
+        {{ form.password.label_tag }}
+        {{ form.password }}
+        <span class="error">{{ form.password.errors.as_text }}</span>
+    </p>
+
+    <input type="submit" value="Register">
+</form>
+{% endblock %}

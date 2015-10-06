@@ -1,0 +1,5 @@
+<div class="kanji-list">
+{% for kanji in kanji_list %}{% comment %} These comments get rid of whitespace in the HTML output.
+{% endcomment %}<a href="{% url 'kanji-detail' kanji.id %}" {% if known_kanji_set and kanji.id in known_kanji_set %} class="known" {% endif %}>{{ kanji.character }}</a>{% comment %}
+{% endcomment %}{% endfor %}
+</div>

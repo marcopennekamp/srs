@@ -1,0 +1,41 @@
+#content {
+    margin: 0 auto;
+    width: 800px;
+}
+
+.error {
+    color: red;
+}
+
+.collection-box {
+    padding: 10px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.kanji-list a {
+    text-decoration: none;
+    color: black;
+    display: inline-block;
+    /* padding: 0.3em 0.5em 0.3em 0.5em; */
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 1.25em;
+    text-align: center;
+}
+
+.kanji-list .known {
+    background-color: white;
+    color: black;
+}
+
+.kanji-list :not(.known) {
+    background-color: black;
+    color: white;
+}
+
+.kanji-list :not(.known):hover {
+    background-color: white;
+    color: black;
+}

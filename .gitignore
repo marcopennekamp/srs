@@ -1,0 +1,9 @@
+# General
+.DS_Store
+.idea
+db.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
