@@ -73,4 +73,4 @@ class WordLevel(models.Model):
     level = models.IntegerField()
 
     def __str__(self):
-        return "User " + self.user.username + " has the word " + self.word.word + " on level " + str(self.level)
+        return self.word.word + " " + str(self.level) + "(" + self.user.username + ")"
