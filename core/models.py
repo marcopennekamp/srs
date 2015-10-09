@@ -46,7 +46,7 @@ class Word(models.Model):
 
 class WordReading(models.Model):
     reading = models.CharField(max_length=200)
-    owner = models.ForeignKey(Word)
+    owner = models.ForeignKey(Word, related_name='readings')
 
     def __str__(self):
         return self.reading
@@ -54,7 +54,7 @@ class WordReading(models.Model):
 
 class WordMeaning(models.Model):
     meaning = models.CharField(max_length=200)
-    owner = models.ForeignKey(Word)
+    owner = models.ForeignKey(Word, related_name='meanings')
 
     def __str__(self):
         return self.meaning
@@ -74,3 +74,12 @@ class WordLevel(models.Model):
 
     def __str__(self):
         return self.word.word + " " + str(self.level) + "(" + self.user.username + ")"
+
+
+class Review(models.Model):
+    user = models.ForeignKey(User)
+    word = models.ForeignKey(Word)
+    date = models.DateTimeField()
+
+    def __str__(self):
+        return self.word.word + " " + str(self.date)

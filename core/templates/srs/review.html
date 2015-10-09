@@ -1,0 +1,49 @@
+{% extends "srs/srs_base.html" %}
+
+{% block app %}
+
+<div ng-controller="ReviewController as review" ng-init="review.init()">
+    <h1>Review</h1>
+
+    {% verbatim %}
+    <div ng-show="review.prompt == 'meaning'">
+        <h1>{{ review.word.word }}</h1>
+        <p>Do you know the <b>meaning</b>?</p>
+        <p>
+            <input id="meaning-input" type="text" placeholder="meaning"
+                   ng-readonly="review.doNextOnEnter"
+                   ng-model="review.inputString"
+                   srs-enter="review.checkMeaning()">
+            <span ng-show="review.feedback != ''" class="feedback" ng-class="review.feedback">
+                {{ review.feedback }}
+                <button ng-click="review.next()">&gt;</button>
+            </span>
+        </p>
+    </div>
+    <div ng-show="review.prompt == 'reading'">
+        <h1>{{ review.word.word }}</h1>
+        <p>Can you <b>read</b> this?</p>
+        <p>
+            <input id="reading-input" type="text" placeholder="仮名ください"
+                   ng-readonly="review.doNextOnEnter"
+                   ng-model="review.inputString"
+                   srs-enter="review.checkReading()">
+            <span ng-show="review.feedback != ''" class="feedback" ng-class="review.feedback">
+                {{ review.feedback }}
+                <button ng-click="review.next()">&gt;</button>
+            </span>
+        </p>
+    </div>
+    <div ng-show="review.prompt == null">
+        <p>You finished your reviews!</p>
+    </div>
+    <div ng-show="review.doNextOnEnter">
+        <p ng-show="review.prompt == 'reading'">Readings: {{review.word.readings.join(', ')}}</p>
+        <p ng-show="review.prompt == 'meaning'">Meanings: {{review.word.meanings.join(', ')}}</p>
+    </div>
+    {% endverbatim %}
+
+    <div style="border-top: 1px solid black; margin-top: 10px;"><button ng-click="review.finish()">Save Progress</button></div>
+</div>
+
+{% endblock %}

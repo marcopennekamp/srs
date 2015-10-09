@@ -1,9 +1,17 @@
 #content {
     margin: 0 auto;
-    width: 800px;
+    width: 600px;
 }
 
 .error {
+    color: red;
+}
+
+.feedback.correct {
+    color: green;
+}
+
+.feedback.wrong {
     color: red;
 }
 
@@ -17,7 +25,6 @@
     text-decoration: none;
     color: black;
     display: inline-block;
-    /* padding: 0.3em 0.5em 0.3em 0.5em; */
     width: 40px;
     height: 40px;
     line-height: 40px;

@@ -1,0 +1,29 @@
+{% extends "srs/srs_base.html" %}
+
+{% block app %}
+
+<div ng-controller="DiscoveryController as discover" ng-init="discover.init()">
+    <h1>Discover</h1>
+
+    {% verbatim %}
+    <div ng-if="discover.currentWord != null">
+        <p>
+            Word: {{discover.currentWord.word}}
+        </p>
+        <p>
+            Readings: {{discover.currentWord.readings.join(', ')}}
+        </p>
+        <p>
+            Meanings: {{discover.currentWord.meanings.join(', ')}}
+        </p>
+        <button ng-click="discover.next()">Next</button>
+    </div>
+    <div ng-if="discover.currentWord == null">
+        No more words to discover!
+    </div>
+    {% endverbatim %}
+
+    <button ng-click="discover.finish()">Save Progress</button>
+</div>
+
+{% endblock %}

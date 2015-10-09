@@ -38,6 +38,7 @@ def login(request):
 
 
 def register(request):
+    # TODO: Unlock all words that don't have any kanji dependencies.
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():

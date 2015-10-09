@@ -2,6 +2,7 @@
 .DS_Store
 .idea
 db.sqlite3
+logs/*
 
 # Python
 __pycache__/

@@ -1,10 +1,6 @@
-# kanji_list may be none, in which case all known kanji for the user are queried.
 import json
 from django.contrib.auth.decorators import login_required
-from django.db import connection
-from django.db.models import Count, F
-from django.db.models.functions import Length
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from core.models import KnownKanji, KanjiCollection, Kanji, Word, WordLevel
 from core.util import get_known_kanji_set
@@ -49,10 +45,10 @@ def kanji_detail(request, kanji_id):
 
 @login_required
 def kanji_list(request):
-    kanjis = Kanji.objects.all()
+    kanji_query = Kanji.objects
     known_kanji_set = get_known_kanji_set(request.user.id, None)
 
-    context = {'kanji_list': kanjis, 'known_kanji_set': known_kanji_set}
+    context = {'kanji_list': kanji_query.all(), 'known_kanji_set': known_kanji_set}
     return render(request, 'kanji/list.html', context)
 
 
@@ -81,6 +77,7 @@ def unlock_words(user_id, kanji_id_list):
                     (SELECT * FROM "core_wordlevel" AS word_level WHERE word_level."user_id" = %(user_id)s)
             SELECT
                 word."id", word."word", word."unique_key",
+                -- These two fields are kept for testing purposes for now.
                 """ + dependency_count_query_str + """ AS dependency_count,
                 """ + known_count_query_str + """ AS known_count
             FROM "core_word" AS word
@@ -100,19 +97,9 @@ def unlock_words(user_id, kanji_id_list):
             )
         """
 
-    cursor = connection.cursor()
-    cursor.execute(word_query_str, {
-            'user_id': str(user_id),
-            'kanji_ids': kanji_id_list,
-        })
-    print(cursor.fetchone())
-
     word_query = Word.objects.raw(
         word_query_str,
-        {
-            'user_id': str(user_id),
-            'kanji_ids': kanji_id_list,
-        }
+        {'user_id': str(user_id), 'kanji_ids': kanji_id_list}
     )
 
     print("Unlock the following words:")
@@ -158,7 +145,7 @@ def mark_kanji(request):
             # This needs to be called after all the known Kanji are saved!
             unlock_words(request.user.id, kanji_id_list)
 
-        return HttpResponse('{}')
+        return JsonResponse({})
     else:
         return HttpResponseNotFound()
 
@@ -172,6 +159,6 @@ def unmark_kanji(request):
         KnownKanji.objects.filter(user_id=request.user.id, kanji_id__in=kanji_id_list).delete()
         lock_unlearned_words(request.user.id, kanji_id_list)
 
-        return HttpResponse('{}')
+        return JsonResponse({})
     else:
         return HttpResponseNotFound()
