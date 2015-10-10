@@ -1,21 +1,53 @@
 {% extends "internal_base.html" %}
 
+{% block head_script %}
+<script>
+var nextReviewTimeElement = null;
+var updateNextReviewDate = function () {
+    var nextReview = moment('{{ next_review_date }}');
+    if (nextReview.isAfter(/* now */)) {
+        nextReviewTimeElement.html(nextReview.fromNow());
+    } else {
+        nextReviewTimeElement.html('now')
+    }
+};
+
+$(document).ready(function(){
+    nextReviewTimeElement = $('#next-review-time');
+    updateNextReviewDate();
+    setInterval(updateNextReviewDate, 5000);
+});
+</script>
+{% endblock %}
+
 {% block content %}
 <h1>Dashboard</h1>
 <div>
-    {% if discovery_queue_size == 1 %}
-        You have 1 new item in your discovery queue.
+    {% if discovery_queue_size == 0 %}
+        You have no words to discover right now.
     {% else %}
-        You have {{ discovery_queue_size }} new items in your discovery queue.
+        {% if discovery_queue_size == 1 %}
+            You have 1 new word in your discovery queue.
+        {% else %}
+            You have {{ discovery_queue_size }} new words in your discovery queue.
+        {% endif %}
+        <a href="{% url 'discover' %}">Discover them now!</a>
     {% endif %}
-    <a href="{% url 'discover' %}">Discover them now!</a>
 </div>
 <div>
-    {% if review_queue_size == 1 %}
-        You have 1 item in your review queue.
+    {% if review_queue_size == 0 %}
+        You have no reviews right now.
+
+        {% if next_review %}
+            Next Review: <span id="next-review-time"></span>
+        {% endif %}
     {% else %}
-        You have {{ review_queue_size }} items in your review queue.
+        {% if review_queue_size == 1 %}
+            You have 1 word in your review queue.
+        {% else %}
+            You have {{ review_queue_size }} words in your review queue.
+        {% endif %}
+        <a href="{% url 'review' %}">Review them now!</a>
     {% endif %}
-    <a href="{% url 'review' %}">Review them now!</a>
 </div>
 {% endblock %}

@@ -14,12 +14,19 @@ srsModule.controller('ReviewController', function ($http) {
 
     controller.prompt = null;
     controller.word = null;
+    controller.placeholder = '';
     controller.untouched = [];
     controller.started = [];
     controller.finished = [];
 
     controller.init = function () {
-        wanakana.bind(document.getElementById('reading-input')); // Bind alphabet to kana conversion library to reading text field.
+        // The event handler needs to be added here, because we need it to execute before the ng-model event handler!
+        document.getElementById('review-input').addEventListener('input', function (a) {
+            if (controller.prompt == 'reading') {
+                // Since we share a text input, we need to filter the calls into wanakana.
+                wanakana._onInput(a);
+            }
+        });
         $http.get('/api/review/words/all').then(function (res) {
             // TODO: Handle errors!
             controller.untouched = res.data;
@@ -31,9 +38,9 @@ srsModule.controller('ReviewController', function ($http) {
             for (var i = 0; i < controller.untouched.length; i += 1) {
                 var word = controller.untouched[i];
                 word.hasKanji = !!(word.readings.length > 1 || word.readings[0] != word.word);
-                word.meaningStats = { isCorrect: false, tries: 0 };
+                word.meaningStats = {isCorrect: false, tries: 0};
                 if (word.hasKanji) {
-                    word.readingStats = { isCorrect: false, tries: 0 };
+                    word.readingStats = {isCorrect: false, tries: 0};
                 }
             }
 
@@ -87,21 +94,37 @@ srsModule.controller('ReviewController', function ($http) {
             } else {
                 controller.prompt = 'meaning';
             }
+
+            // Set placeholder.
+            if (controller.prompt == 'meaning') {
+                controller.placeholder = 'meaning';
+            } else if (controller.prompt == 'reading') {
+                controller.placeholder = '解答';
+            }
         } else {
             controller.prompt = null;
+            controller.placeholder = '';
             controller.saveFinished();
         }
     };
 
+    controller.check = function () {
+        if (controller.prompt == 'meaning') {
+            controller.checkMeaning();
+        } else if (controller.prompt == 'reading') {
+            controller.checkReading();
+        }
+    };
+
     controller.checkMeaning = function () {
-        controller.checkInput(controller.word, controller.word.meaningStats, controller.word.meanings)
+        controller.checkInputInternal(controller.word, controller.word.meaningStats, controller.word.meanings)
     };
 
     controller.checkReading = function () {
-        controller.checkInput(controller.word, controller.word.readingStats, controller.word.readings)
+        controller.checkInputInternal(controller.word, controller.word.readingStats, controller.word.readings)
     };
 
-    controller.checkInput = function(word, stats, allowedStrings) {
+    controller.checkInputInternal = function (word, stats, allowedStrings) {
         if (controller.doNextOnEnter) {
             controller.next();
         } else {
@@ -129,7 +152,7 @@ srsModule.controller('ReviewController', function ($http) {
         }
     };
 
-    controller.maybeFinishWord = function(word) {
+    controller.maybeFinishWord = function (word) {
         if (word.meaningStats.isCorrect && (!word.hasKanji || word.readingStats.isCorrect)) { // Word is finished!
             var finishedWordData = {id: word.id, meaning_tries: word.meaningStats.tries};
             if (word.hasKanji) {
@@ -146,17 +169,19 @@ srsModule.controller('ReviewController', function ($http) {
     };
 
     controller.saveFinished = function () {
-        var data = controller.finished;
-        controller.finished = [];
-        $http.put(
-            '/api/review/finish',
-            data
-        ).then(
-            function (res) { // Success
-                alert('Your progress has been saved.');
-            }, function (res) { // Error
-                alert('An error occurred while trying to save the words as discovered.');
-            }
-        );
+        if (controller.finished.length > 0) {
+            var data = controller.finished;
+            controller.finished = [];
+            $http.put(
+                '/api/review/finish',
+                data
+            ).then(
+                function (res) { // Success
+                    alert('Your progress has been saved.');
+                }, function (res) { // Error
+                    alert('An error occurred while trying to save the words as discovered.');
+                }
+            );
+        }
     };
 });

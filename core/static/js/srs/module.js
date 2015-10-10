@@ -15,3 +15,17 @@ srsModule.directive('srsEnter', function () {
         });
     };
 });
+
+srsModule.directive('srsFocus', function ($timeout) {
+    return {
+        scope: {trigger: '=srsFocus'},
+        link: function (scope, element) {
+            scope.$watch('trigger', function (value) {
+                if (value === true) {
+                    element[0].focus();
+                    element[0].select();
+                }
+            });
+        }
+    };
+});

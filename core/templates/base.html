@@ -7,9 +7,11 @@
     <meta charset="UTF-8">
     <title>{% block title %}SRS{% endblock %}</title>
     <link rel="stylesheet" href="{% static "css/main.css" %}">
+    <link rel="stylesheet" href="{% static "css/srs.css" %}">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
     <script src="{% static "js/wanakana.js" %}"></script>
     <script src="{% static "js/util.js" %}"></script>
     <script src="{% static "js/csrf.js" %}"></script>
@@ -22,6 +24,7 @@
             setupCsrfForAjax();
         });
     </script>
+    {% block head_script %}{% endblock %}
 </head>
 
 <body>

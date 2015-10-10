@@ -28,17 +28,19 @@ srsModule.controller('DiscoveryController', function ($http) {
     };
 
     controller.saveFinished = function () {
-        var words = controller.finished;
-        controller.finished = [];
-        $http.put(
-            '/api/discover/finish',
-            words
-        ).then(
-            function (res) { // Success
-                alert('Your progress has been saved.');
-            }, function (res) { // Error
-                alert('An error occurred while trying to save the words as discovered.');
-            }
-        );
+        if (controller.finished.length > 0) {
+            var words = controller.finished;
+            controller.finished = [];
+            $http.put(
+                '/api/discover/finish',
+                words
+            ).then(
+                function (res) { // Success
+                    alert('Your progress has been saved.');
+                }, function (res) { // Error
+                    alert('An error occurred while trying to save the words as discovered.');
+                }
+            );
+        }
     };
 });

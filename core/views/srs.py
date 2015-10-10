@@ -1,10 +1,11 @@
-from datetime import timedelta
 import json
+from types import SimpleNamespace
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseNotFound, HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
 from core.models import WordLevel, Review, WordReading, WordMeaning, Word
+from core.util import get_review_time
 
 
 @login_required
@@ -81,28 +82,6 @@ def get_discovery_list(request):
     return HttpResponse(json.dumps(discovery_queue), content_type="application/json")
 
 
-# Returns the time in seconds to the next review.
-def get_review_time(next_word_level):
-    minutes = 60
-    hours = 60 * minutes
-    days = 24 * hours
-    level_to_time = [
-        0,                  # -> Level 0
-        0,                  # -> Level 1
-        30 * minutes,       # -> Level 2
-        4 * hours,          # -> Level 3
-        8 * hours,          # -> Level 4
-        1 * days,           # -> Level 5
-        3 * days,           # -> Level 6
-        7 * days,           # -> Level 7
-        14 * days,          # -> Level 8
-        30 * days,          # -> Level 9
-        120 * days,         # -> Level 10
-    ]
-
-    return level_to_time[next_word_level]
-
-
 @login_required
 def finish_discovery(request):
     if request.method == 'PUT':
@@ -111,27 +90,26 @@ def finish_discovery(request):
 
         affected_row_count = (
             user_word_level_query
-            .filter(level=0)
-            .filter(word_id__in=word_ids)
-            .update(level=1)
+                .filter(level=0)
+                .filter(word_id__in=word_ids)
+                .update(level=1)
         )
 
         print(affected_row_count)
 
-        # Insert next reviews.
         if affected_row_count != len(word_ids):
             # In this case at least one word wasn't pushed to level 1,
             # so we need to fetch the words that were.
             word_ids = (
                 user_word_level_query
-                .filter(level=1)
-                .filter(word_id__in=word_ids)
-                .values_list('id', flat=True)
-                .all()
+                    .filter(level=1)
+                    .filter(word_id__in=word_ids)
+                    .values_list('id', flat=True)
+                    .all()
             )
 
-        # Insert next review.
-        review_date = timezone.now() + timedelta(seconds=get_review_time(next_word_level=2))
+        # Insert next reviews.
+        review_date = timezone.now() + get_review_time(next_word_level=2)
         Review.objects.bulk_create(
             [Review(word_id=word_id, user_id=request.user.id, date=review_date) for word_id in word_ids]
         )
@@ -143,8 +121,59 @@ def finish_discovery(request):
 
 def finish_review(request):
     if request.method == 'PUT':
-        stats = json.loads(request.body.decode("utf-8"))
-        print(stats)
+        user_word_level_query = WordLevel.objects.filter(user_id=request.user.id)
+
+        # Fields: id, meaning_tries, maybe reading_tries (in case the word has kanji)
+        stat_data_list = json.loads(request.body.decode("utf-8"))
+        word_ids = [stat['id'] for stat in stat_data_list]
+
+        # Transform stats_list into a map.
+        stat_map = {}
+        for stat_data in stat_data_list:
+            wrong_tries = (
+                stat_data['meaning_tries'] - 1 +
+                stat_data.get('reading_tries', 1) - 1  # In case the word has no kanji, this evaluates to 0.
+            )
+            # We set level and new_level here to sensible default values, but they should be filled later.
+            stat_map[stat_data['id']] = SimpleNamespace(
+                word_id=stat_data['id'],
+                wrong_tries=wrong_tries,
+                level_id=-1,
+                level=1,
+                new_level=1
+            )
+
+        # Fetch current levels.
+        word_levels = (
+            user_word_level_query
+            .filter(word_id__in=word_ids)
+            .values_list('id', 'word_id', 'level')
+            .all()
+        )
+        for level_id, word_id, level in word_levels:
+            stat = stat_map[word_id]
+            stat.level_id = level_id
+            stat.level = level
+
+        # Calculate new levels.
+        for stat in stat_map.values():
+            if stat.wrong_tries > 0:
+                stat.new_level = max(1, stat.level - stat.wrong_tries * 2)
+            else:
+                stat.new_level = min(WordLevel.MAX_LEVEL, stat.level + 1)
+
+        # Delete all reviews for the words.
+        print(Review.objects.filter(user_id=request.user.id).filter(word_id__in=word_ids).delete())
+
+        # Update all changed levels in the database and set new review times.
+        for stat in stat_map.values():
+            if stat.level != stat.new_level:
+                WordLevel.objects.filter(id=stat.level_id).update(level=stat.new_level)
+            # Review date for the next level.
+            review_date = timezone.now() + get_review_time(next_word_level=stat.new_level + 1)
+            next_review = Review(user_id=request.user.id, word_id=stat.word_id, date=review_date)
+            next_review.save()
+
         return JsonResponse({})
     else:
         return HttpResponseNotFound()
