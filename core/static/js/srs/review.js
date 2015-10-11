@@ -19,6 +19,9 @@ srsModule.controller('ReviewController', function ($http) {
     controller.started = [];
     controller.finished = [];
 
+    controller.wordCount = 0;
+    controller.correctPercentage = 1.0;
+
     controller.init = function () {
         // The event handler needs to be added here, because we need it to execute before the ng-model event handler!
         document.getElementById('review-input').addEventListener('input', function (a) {
@@ -43,6 +46,8 @@ srsModule.controller('ReviewController', function ($http) {
                     word.readingStats = {isCorrect: false, tries: 0};
                 }
             }
+
+            controller.wordCount = controller.untouched.length;
 
             // Fetch the first word.
             controller.next();
@@ -117,18 +122,19 @@ srsModule.controller('ReviewController', function ($http) {
     };
 
     controller.checkMeaning = function () {
-        controller.checkInputInternal(controller.word, controller.word.meaningStats, controller.word.meanings)
+        var input = controller.inputString.toLowerCase();
+        controller.checkInputInternal(input, controller.word, controller.word.meaningStats, controller.word.meanings)
     };
 
     controller.checkReading = function () {
-        controller.checkInputInternal(controller.word, controller.word.readingStats, controller.word.readings)
+        var input = wanakana.toKana(controller.inputString);
+        controller.checkInputInternal(input, controller.word, controller.word.readingStats, controller.word.readings)
     };
 
-    controller.checkInputInternal = function (word, stats, allowedStrings) {
+    controller.checkInputInternal = function (input, word, stats, allowedStrings) {
         if (controller.doNextOnEnter) {
             controller.next();
         } else {
-            var input = controller.inputString;
             var valid = false;
             for (var i = 0; i < allowedStrings.length; i += 1) {
                 if (input === allowedStrings[i]) {
@@ -159,9 +165,23 @@ srsModule.controller('ReviewController', function ($http) {
                 finishedWordData.reading_tries = word.readingStats.tries;
             }
             controller.finished.push(finishedWordData);
+            controller.updateCorrectPercentage();
         } else {
             controller.started.push(word);
         }
+    };
+
+    controller.updateCorrectPercentage = function () {
+        var correctWordCount = 0;
+        var wordCount = controller.finished.length;
+        for (var i = 0; i < wordCount; i += 1) {
+            var word = controller.finished[i];
+            if (word.meaning_tries == 1 && (!word.hasOwnProperty('reading_tries') || word.reading_tries == 1)) {
+                correctWordCount += 1;
+            }
+        }
+        console.log(correctWordCount + ' / ' + wordCount)
+        controller.correctPercentage = correctWordCount / wordCount;
     };
 
     controller.finish = function () {
@@ -169,6 +189,8 @@ srsModule.controller('ReviewController', function ($http) {
     };
 
     controller.saveFinished = function () {
+        return;
+
         if (controller.finished.length > 0) {
             var data = controller.finished;
             controller.finished = [];

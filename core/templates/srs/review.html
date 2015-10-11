@@ -1,17 +1,29 @@
 {% extends "srs/srs_base.html" %}
 
+{% load staticfiles %}
+
 {% block app %}
 
-<div ng-controller="ReviewController as review" ng-init="review.init()">
-    <h1>Review</h1>
-
+<div class="review" ng-controller="ReviewController as review" ng-init="review.init()">
     {% verbatim %}
-    <form   class="review-meaning review cf"
-            ng-class="{'review-meaning': review.prompt == 'meaning', 'review-reading': review.prompt == 'reading'}"
+    <div class="review-header">
+        REVIEW
+        <span class="review-stat">
+            {% endverbatim %}<img class="correct" src="{% static "icon/level-up.svg" %}" alt="Words correct">{% verbatim %}
+            {{ review.correctPercentage | percentage:0 }}
+        </span>
+        <span class="review-stat">
+            {% endverbatim %}<img class="check" src="{% static "icon/check.svg" %}" alt="Words finished">{% verbatim %}
+            {{ review.finished.length }}/{{ review.wordCount }}
+        </span>
+    </div>
+    <form   class="review-form cf"
+            ng-class="{'meaning-prompt': review.prompt == 'meaning', 'reading-prompt': review.prompt == 'reading'}"
             ng-show="review.prompt != null">
         <p class="word">{{ review.word.word }}</p>
-        <input id="review-input" class="review-input"
-               type="text" placeholder="{{review.placeholder}}"
+        <input id="review-input"
+               type="text"
+               placeholder="{{review.placeholder}}"
                autocomplete="off"
                autocorrect="off"
                autocapitalize="off"
@@ -24,11 +36,22 @@
         <button class="next" ng-show="review.feedback != ''" ng-click="review.next()"><span>&rarr;</span></button>
     </form>
     <div ng-show="review.prompt == null">
-        <p>You finished your reviews!</p>
+        <p>You finished your reviews with {{ review.correctPercentage | percentage:0 }} accuracy!</p>
     </div>
-    <div ng-show="review.doNextOnEnter">
-        <p ng-show="review.prompt == 'reading'">Readings: {{review.word.readings.join(', ')}}</p>
-        <p ng-show="review.prompt == 'meaning'">Meanings: {{review.word.meanings.join(', ')}}</p>
+
+    <div class="review-hint pure-g" ng-show="review.doNextOnEnter">
+        <div class="pure-u-1-3" ng-show="review.prompt == 'meaning'">
+            Meanings
+        </div>
+        <div class="pure-u-2-3" ng-show="review.prompt == 'meaning'">
+            {{review.word.meanings.join(', ')}}
+        </div>
+        <div class="pure-u-1-3" ng-show="review.prompt == 'reading'">
+            Readings
+        </div>
+        <div class="pure-u-2-3" ng-show="review.prompt == 'reading'">
+            {{review.word.readings.join(', ')}}
+        </div>
     </div>
     {% endverbatim %}
 </div>

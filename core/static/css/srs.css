@@ -1,70 +1,109 @@
-.cf:before, .cf:after {
-    content: "";
-    display: table;
-}
-
-.cf:after {
-    clear: both;
-}
-
-.cf {
-    zoom: 1;
-}
-
 .review {
+    margin-top: 45px;
+}
+
+.review-header {
+    font-weight: lighter;
+    font-size: 24pt;
+    border-bottom: 1px solid rgba(150, 150, 150, 0.5);
+    margin-bottom: 45px;
+    position: relative;
+    opacity: 0.5;
+}
+
+.review-header > .review-stat {
+    font-size: 20pt;
+    display: inline-block;
+    float: right;
+    position: relative;
+    top: 5px;
+    margin-left: 25px;
+}
+
+.review-header > .review-stat > .check, .review-header > span > .correct {
+    height: 25px;
+    margin-right: 7px;
+    position: relative;
+    top: 3px;
+}
+
+.review-form {
     position: relative;
 }
 
-.review .word {
+.review-form > .word {
     font-size: 40pt;
     text-align: center;
     margin: 0;
     padding: 5px 5px 5px 5px;
 }
 
-.review-input {
-    border: 1px solid rgba(150, 150, 150, .5);
+.review-form > input {
+    border: 1px solid rgba(150, 150, 150, 0.5);
     font-size: 20pt;
+    line-height: 1.3; /* Fixes the Japanese placeholder text being cut off at the bottom. */
     text-align: center;
     float: left;
     width: 588px;
     padding: 5px 5px 5px 5px;
 }
 
-.review-input:focus {
+.review-form > input:focus {
     outline: none;
 }
 
-.review .next {
+.review-form > .next {
     font-size: 20pt;
     text-align: center;
     display: inline-block;
     width: 50px;
-    height: 44px;
+    height: 47px;
     position: absolute;
     float: right;
     right: 0;
     cursor: pointer;
     border: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    margin: 2px 0 0 0;
-    padding: 5px 5px 5px 5px;
+    margin: 0 0 0 0;
+    padding: 5px 5px 6px 5px;
     color: white;
 }
 
-.review .next span {
+.review-form > .next > span {
     display: inline-block;
     vertical-align: middle;
     position: relative;
     top: -2px;
 }
 
-.guess-correct {
+.review-form > .guess-correct {
     background-color: #40B040;
     color: white;
 }
 
-.guess-wrong {
+.review-form > .guess-wrong {
     background-color: #D03030;
     color: white;
+}
+
+.review-hint {
+    margin-top: 30px;
+    font-weight: lighter;
+}
+
+.review-hint > div {
+    font-size: 20pt;
+    line-height: 1.5em;
+    padding: 10px 5px 10px 5px;
+    margin: 30px 0 0 0;
+}
+
+.review-hint > div.pure-u-1-3 {
+    border-right: 1px solid rgba(150, 150, 150, 0.5);
+    padding-left: 0;
+}
+
+.review-hint > div.pure-u-2-3 {
+    padding-left: 25px;
+    padding-right: 0;
 }
